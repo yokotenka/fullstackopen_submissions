@@ -4,30 +4,77 @@
  * persons array. 
  */
 
+import { useState } from 'react'
+import serverService from '../services/server'
 
-const AddNumber = ({persons, setPersons, newName, setNewName, newNumber, setNewNumber})=> {
+
+const AddNumber = ({persons, setPersons, search})=> {
     
+    const [newName, setNewName] = useState('')
+    const [newNumber, setNewNumber] = useState('')
+
     const add = (event) => {
+        
         // important step
         event.preventDefault()
-        const noteObject = {
+        const newObject = {
           name: newName,
-          number: newNumber,
-          id: newNumber
+          number: newNumber
         }
-        // const isNewName = persons.reduce((acc, item) => (item.name !== newName) && acc, true)
-        const isNewNumber = persons.reduce((acc, item) => (item.number !== newNumber) && acc, true)
-    
-        if (newName === '' || newNumber===''){
-          alert(`one of the texts is empty`)
+        const sameName = persons.find(item => item.name === newName)
+        const sameNumber = persons.find(item => item.number === newNumber)
+        console.log(sameName, sameNumber)
+        const isNewName = !(sameName !== undefined)
+        const isNewNumber = !(sameNumber !== undefined)
+        console.log(isNewName, isNewNumber)
+        let replaceOldNumber = false
+        let replaceOldName = false
+
+        if (!isNewName && isNewNumber){
+          replaceOldNumber = window.confirm(`${newName} is already added to phonebook, replace old number with the new one?`)
+        } else if (isNewName && !isNewNumber){
+          replaceOldName = window.confirm(`${newNumber} is already added to phonebook, replace old name with the new one?`)
+        } else if (!isNewName && !isNewNumber){
+          alert(`${newNumber} and ${newName} is already added to phonebook`)
+          return
+        } else if (newName === '' && newNumber ===''){
+          alert(`One or both entry is empty`)
+          return
         }
-        else if (isNewNumber){
-          setPersons(persons.concat(noteObject))
-        }else{
-          alert(`${newNumber} is already added to phonebook`)
-        }   
-        setNewName('')
-        setNewNumber('')
+
+        if ((isNewName && isNewNumber)){
+          serverService
+          .create(newObject)
+          .then(response => {
+            console.log('post success', response)
+            const response_ = {...response, show: newName.toLowerCase().includes(search.toLowerCase())}
+            setPersons(persons.concat(response_))
+            setNewName('')
+            setNewNumber('')
+          })
+        } else if (replaceOldName){
+          serverService
+          .update(sameNumber.id, newObject)
+          .then(response => {
+            console.log('post success', response)
+            const response_ = {...response, show: newName.toLowerCase().includes(search.toLowerCase())}
+            const persons_ = persons.map(item => item.number === response_.number ? response_ : item);
+            setPersons(persons_)
+            setNewName('')
+            setNewNumber('')
+          })
+        } else if (replaceOldNumber){
+          serverService
+          .update(sameName.id, newObject)
+          .then(response => {
+            console.log('post success', response)
+            const response_ = {...response, show: newName.toLowerCase().includes(search.toLowerCase())}
+            const persons_ = persons.map(item => item.name === response_.name ? response_ : item);
+            setPersons(persons_)
+            setNewName('')
+            setNewNumber('')
+          })
+        }
       }
     
       const handleNewNameChange = (event) => {
