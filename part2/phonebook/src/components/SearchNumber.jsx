@@ -14,12 +14,11 @@ const SearchNumber = ({persons, setPersons, search, setSearch}) => {
 
     return (
         <div>
-            <h2>Phonebook</h2>
-                <form>
-                    <div>
-                    filter shown with<input value={search} onChange={handleNewSearch} />
-                    </div>
-                </form>
+            <form>
+                <div>
+                filter shown with<input value={search} onChange={handleNewSearch} />
+                </div>
+            </form>
         </div>
     )
 

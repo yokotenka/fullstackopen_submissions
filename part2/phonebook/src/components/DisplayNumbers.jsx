@@ -1,13 +1,21 @@
 import serverService from '../services/server'
 
-const DisplayNumbers = ({persons, setPersons}) => {
+const DisplayNumbers = ({persons, setPersons, setHeaderMessage}) => {
     
-    const deleteNumber = itemID => {
+    const deleteNumber = item => {
+        const itemID = item.id
         serverService
             .deleteObject(itemID)
             .then(response => {
                 console.log(response)
                 setPersons(persons.filter(item => item.id !== response.id))
+                setHeaderMessage([`Deleted ${response.name} from the server`, 'deleted'])
+                setTimeout(() => {
+                    setHeaderMessage(['',''])
+                  }, 5000)
+            })
+            .catch(()=>{
+                setHeaderMessage([`Information of ${item.name} has already been removed from the server`, 'error'])
             })
     }  
     
@@ -16,7 +24,7 @@ const DisplayNumbers = ({persons, setPersons}) => {
             <h2>Numbers</h2>
             {persons
                 .filter(item => item.show)
-                .map(item => <div key={item.id}>{item.name} {item.number} <button onClick={() => deleteNumber(item.id)}>delete</button></div>)}
+                .map(item => <div key={item.id}>{item.name} {item.number} <button onClick={() => deleteNumber(item)}>delete</button></div>)}
         </div>
     )
 }

@@ -7,8 +7,7 @@
 import { useState } from 'react'
 import serverService from '../services/server'
 
-
-const AddNumber = ({persons, setPersons, search})=> {
+const AddNumber = ({persons, setPersons, search, setHeaderMessage})=> {
     
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
@@ -51,6 +50,7 @@ const AddNumber = ({persons, setPersons, search})=> {
             setPersons(persons.concat(response_))
             setNewName('')
             setNewNumber('')
+            setHeaderMessage([`Added ${newName}`, 'added'])
           })
         } else if (replaceOldName){
           serverService
@@ -62,6 +62,9 @@ const AddNumber = ({persons, setPersons, search})=> {
             setPersons(persons_)
             setNewName('')
             setNewNumber('')
+            setHeaderMessage([`Changed name to ${newName}`, 'changed'])
+          }).catch(() => {
+            setHeaderMessage([`Information for ${newName} has aready been removed from the server`, 'error'])
           })
         } else if (replaceOldNumber){
           serverService
@@ -73,8 +76,15 @@ const AddNumber = ({persons, setPersons, search})=> {
             setPersons(persons_)
             setNewName('')
             setNewNumber('')
+            setHeaderMessage([`Changed number to ${newNumber}`, 'changed'])
+          })
+          .catch(() => {
+            setHeaderMessage([`Information for ${newName} has aready been removed from the server`, 'error'])
           })
         }
+        setTimeout(() => {
+          setHeaderMessage(['',''])
+        }, 5000)
       }
     
       const handleNewNameChange = (event) => {
